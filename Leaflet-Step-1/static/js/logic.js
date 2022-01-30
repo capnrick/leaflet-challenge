@@ -32,18 +32,18 @@ function createFeatures(earthquakeData) {
 
         switch(true){
 
-          case depth>65:
-            return "blue";
+          case depth>60:
+            return "#800026";
           case depth>45:
-              return "green";
+              return "#BD0026";
           case depth>30:
-            return "lightgreen";
+            return "#E31A1C";
           case depth>15:
-              return "greenyellow";
+              return "#FC4E2A";
           case depth>5:
-                return "yellow";
+                return "#FD8D3C";
           default:
-                return "white";
+                return "#FFEDA0";
        }
     }
 
@@ -68,7 +68,9 @@ function createFeatures(earthquakeData) {
 
 
   // Sending our earthquakes layer to the createMap function
+
   createMap(earthquakes);
+
 }
 
 
@@ -77,11 +79,16 @@ function createFeatures(earthquakeData) {
 //---------------------------------------overall function for creating Map---------------------------------
 function createMap(earthquakes) {
 
+
+
+
+
   // Define streetmap and darkmap layers
   var streetmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
     maxZoom: 18,
+   
     zoomOffset: -1,
     id: "mapbox/streets-v11",
     accessToken: API_KEY
@@ -110,9 +117,15 @@ function createMap(earthquakes) {
     center: [
       37.09, -95.71
     ],
-    zoom: 2.5,
+    zoom: 3,
+    worldCopyJump:true,
+  
     layers: [streetmap, earthquakes]
   });
+
+
+
+
 
   // Create a layer control
   // Pass in our baseMaps and overlayMaps
@@ -120,39 +133,40 @@ function createMap(earthquakes) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+//getColor function and create legend code taken from https://leafletjs.com/examples/choropleth/
+
+  function getColor(d) {
+    return d > 60 ? '#800026' :
+           d > 45 ? '#BD0026' :
+           d > 30 ? '#E31A1C' :
+           d > 15 ? '#FC4E2A' :
+           d > 5  ? '#FD8D3C' :
+                                '#FFEDA0';
 }
+var legend = L.control({position: 'bottomright'});
 
-// // Loop through the features array and create one marker for each feature object
-// for (var i = 0; i < feature.length; i++) {
+legend.onAdd = function (map) {
 
-//   // Conditionals for countries points
-//   var color = "";
-//   if (feature.geometry.coordinates[2] >= 10) {
-//     color = "dark-green";
-//   }
-//   else if (feature.geometry.coordinates[2] >= 5) {
-//     color = "green";
-//   }
-//   else if (feature.geometry.coordinates[2]  >= 3) {
-//     color = "yellow-green";
-//   }
-//   else {
-//     color = "yellow";
-//   }
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 5, 15, 30, 45, 65],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
 
 
-//   // // Add circles to map
-//   // L.circleMarker(feature[i].location, {
-//   //   fillOpacity: 0.75,
-//   //   color: "white",
-//   //   fillColor: color,
-//   //   // Adjust radius
-//   //   radius: feature.properties.mag *5,
-//   // }).addTo(myMap);
-// }
+
+legend.addTo(myMap);
+
+
+
+}
  
-
-
-
-
-  
